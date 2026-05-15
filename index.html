@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deine verlorene Stunde</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Sarina&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #f1ecec;
+    --text: #57414d;
+    --highlight: #997c42;
+    --main: #ccd8c6;
+    --accent: #ca6e94;
+  }
+  body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Trebuchet MS', sans-serif;
+    min-height: 100vh;
+    padding: 2.5rem 1rem 4rem;
+  }
+  body::before {
+    content: '';
+    position: fixed; top: -120px; right: -120px;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(202,110,148,0.13) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed; bottom: -100px; left: -100px;
+    width: 450px; height: 450px;
+    background: radial-gradient(circle, rgba(153,124,66,0.10) 0%, transparent 70%);
+    pointer-events: none; z-index: 0;
+  }
+  .container { max-width: 740px; margin: 0 auto; position: relative; z-index: 1; }
+
+  /* HEADER */
+  .header { text-align: center; margin-bottom: 2.5rem; }
+  .sarina-top {
+    font-family: 'Sarina', cursive;
+    color: var(--accent); font-size: 1.1rem;
+    display: block; margin-bottom: 0.6rem;
+    opacity: 0; animation: fadeUp 0.6s ease forwards 0.1s;
+  }
+  h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(1.9rem, 5vw, 2.9rem);
+    color: var(--text); line-height: 1.2; text-align: center;
+    opacity: 0; animation: fadeUp 0.6s ease forwards 0.2s;
+  }
+  h1 em { font-style: italic; color: var(--highlight); }
+  .subtitle {
+    text-align: center; margin-top: 0.9rem;
+    font-size: 0.96rem; color: var(--text);
+    line-height: 1.65; opacity: 0;
+    animation: fadeUp 0.6s ease forwards 0.3s;
+  }
+  .divider {
+    width: 64px; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--highlight));
+    margin: 1.5rem auto; border-radius: 2px;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.35s;
+  }
+
+  /* PROGRESS */
+  .step-indicator {
+    display: flex; justify-content: center; gap: 0.55rem;
+    margin-bottom: 1rem;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.4s;
+  }
+  .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--main); transition: all 0.3s; }
+  .step-dot.active { background: var(--accent); transform: scale(1.4); }
+  .step-dot.done { background: var(--highlight); }
+  .progress-wrap {
+    background: rgba(87,65,77,0.1); border-radius: 10px; height: 4px;
+    margin-bottom: 2rem; overflow: hidden;
+    opacity: 0; animation: fadeUp 0.5s ease forwards 0.42s;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--highlight));
+    border-radius: 10px; transition: width 0.5s ease;
+  }
+
+  /* INPUT BLOCKS */
+  .input-section {
+    background: rgba(87,65,77,0.07);
+    border: 1px solid rgba(87,65,77,0.13);
+    border-radius: 18px; padding: 2.2rem 2rem; margin-bottom: 1.5rem;
+    opacity: 0; animation: fadeUp 0.7s ease forwards 0.5s;
+  }
+  .section-label {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.3rem; color: var(--text); text-align: center; margin-bottom: 0.4rem;
+  }
+  .section-hint {
+    font-size: 0.83rem; color: var(--text); opacity: 0.6;
+    text-align: center; margin-bottom: 1.4rem; line-height: 1.55;
+  }
+  textarea {
+    width: 100%;
+    background: rgba(87,65,77,0.055);
+    border: 1.5px solid rgba(87,65,77,0.17); border-radius: 11px;
+    padding: 1rem 1.2rem;
+    font-family: 'Trebuchet MS', sans-serif; font-size: 0.9rem;
+    color: var(--text); resize: vertical; min-height: 130px;
+    transition: border-color 0.25s, box-shadow 0.25s; outline: none; line-height: 1.65;
+  }
+  textarea::placeholder { color: rgba(87,65,77,0.38); }
+  textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(202,110,148,0.13); }
+  .char-count { font-size: 0.74rem; color: var(--text); opacity: 0.38; text-align: right; margin-top: 0.3rem; }
+
+  .question-card {
+    background: rgba(204,216,198,0.22); border: 1px solid rgba(204,216,198,0.55);
+    border-radius: 13px; padding: 1.3rem 1.5rem; margin-bottom: 1.1rem;
+  }
+  .question-card label { display: block; font-size: 0.89rem; font-weight: 600; color: var(--text); margin-bottom: 0.28rem; }
+  .q-hint { font-size: 0.78rem; color: var(--text); opacity: 0.48; margin-bottom: 0.6rem; }
+  .question-card textarea { min-height: 90px; }
+
+  /* BUTTONS */
+  .btn-primary {
+    display: block; width: 100%; padding: 1rem 2rem;
+    background: linear-gradient(135deg, var(--highlight), #b8944f);
+    color: #fff; font-family: 'Trebuchet MS', sans-serif;
+    font-size: 0.96rem; font-weight: 700; letter-spacing: 0.04em;
+    border: none; border-radius: 11px; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+    margin-top: 1.2rem; box-shadow: 0 4px 18px rgba(153,124,66,0.26);
+  }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 26px rgba(153,124,66,0.36); }
+  .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.6rem 1.3rem; background: transparent;
+    border: 1.5px solid rgba(87,65,77,0.35); color: var(--text);
+    border-radius: 9px; font-size: 0.85rem; cursor: pointer;
+    transition: all 0.2s; margin-bottom: 1.8rem; opacity: 0.65;
+  }
+  .btn-back:hover { opacity: 1; background: rgba(87,65,77,0.06); }
+
+  /* LOADING */
+  .loading-state { text-align: center; padding: 3.5rem 1rem; display: none; }
+  .loading-state.visible { display: block; }
+  .spinner {
+    width: 46px; height: 46px;
+    border: 3px solid var(--main); border-top-color: var(--accent);
+    border-radius: 50%; animation: spin 0.85s linear infinite; margin: 0 auto 1.3rem;
+  }
+  .loading-text { font-family: 'Instrument Serif', serif; font-size: 1.1rem; color: var(--text); opacity: 0.82; }
+  .loading-sub { font-size: 0.8rem; color: var(--text); opacity: 0.48; margin-top: 0.45rem; }
+
+  /* ERROR */
+  .error-box {
+    background: rgba(202,110,148,0.09); border: 1px solid rgba(202,110,148,0.3);
+    border-radius: 11px; padding: 1rem 1.3rem; color: var(--text);
+    font-size: 0.87rem; display: none; margin-top: 1rem; line-height: 1.55;
+  }
+  .error-box.visible { display: block; }
+
+  /* RESULTS */
+  .results-section { display: none; }
+  .results-section.visible { display: block; }
+  .results-header { text-align: center; margin-bottom: 2.2rem; }
+  .results-header h2 { font-family: 'Instrument Serif', serif; font-size: clamp(1.6rem,4vw,2.2rem); color: var(--text); }
+  .results-header p { font-size: 0.87rem; color: var(--text); opacity: 0.6; margin-top: 0.5rem; }
+
+  .summary-box {
+    background: linear-gradient(135deg, rgba(202,110,148,0.11), rgba(153,124,66,0.11));
+    border: 1px solid rgba(202,110,148,0.22); border-radius: 18px;
+    padding: 2rem; text-align: center; margin-bottom: 1.8rem;
+    opacity: 0; animation: fadeUp 0.6s ease forwards 0.05s;
+  }
+  .sarina-inner { font-family: 'Sarina', cursive; color: var(--accent); font-size: 1rem; display: block; margin-bottom: 0.7rem; }
+  .summary-number { font-family: 'Instrument Serif', serif; font-size: 3.2rem; color: var(--highlight); line-height: 1; display: block; }
+  .summary-label { font-size: 0.87rem; color: var(--text); opacity: 0.68; margin-top: 0.5rem; }
+  .summary-text { margin-top: 1rem; font-size: 0.89rem; color: var(--text); opacity: 0.82; line-height: 1.65; }
+
+  .result-card {
+    border-radius: 15px; padding: 1.6rem 1.7rem; margin-bottom: 1.2rem;
+    opacity: 0; transform: translateY(22px); animation: fadeUp 0.6s ease forwards;
+    position: relative; overflow: hidden;
+  }
+  .result-card::before {
+    content: ''; position: absolute; top: 0; left: 0;
+    width: 4px; height: 100%; border-radius: 4px 0 0 4px;
+  }
+  .card-free { background: rgba(204,216,198,0.48); border: 1px solid rgba(204,216,198,0.8); }
+  .card-free::before { background: #a8c0a0; }
+  .card-save { background: rgba(153,124,66,0.09); border: 1px solid rgba(153,124,66,0.24); }
+  .card-save::before { background: var(--highlight); }
+  .card-delegate { background: rgba(202,110,148,0.09); border: 1px solid rgba(202,110,148,0.24); }
+  .card-delegate::before { background: var(--accent); }
+  .card-insight { background: rgba(241,236,236,0.9); border: 1px solid rgba(87,65,77,0.14); }
+  .card-insight::before { background: var(--text); }
+
+  .card-type-badge {
+    display: inline-block; font-size: 0.7rem; font-weight: 700;
+    letter-spacing: 0.09em; text-transform: uppercase;
+    padding: 0.22rem 0.65rem; border-radius: 20px; margin-bottom: 0.75rem;
+  }
+  .card-free .card-type-badge { background: rgba(204,216,198,0.9); color: #4a6b45; }
+  .card-save .card-type-badge { background: rgba(153,124,66,0.18); color: var(--highlight); }
+  .card-delegate .card-type-badge { background: rgba(202,110,148,0.18); color: var(--accent); }
+  .card-insight .card-type-badge { background: rgba(87,65,77,0.1); color: var(--text); }
+
+  .card-title { font-family: 'Instrument Serif', serif; font-size: 1.18rem; color: var(--text); margin-bottom: 0.55rem; }
+  .card-body { font-size: 0.88rem; color: var(--text); line-height: 1.68; opacity: 0.83; }
+  .card-time {
+    display: inline-flex; align-items: center; gap: 0.35rem; margin-top: 0.9rem;
+    font-size: 0.79rem; font-weight: 700; color: var(--highlight);
+    background: rgba(153,124,66,0.1); padding: 0.3rem 0.75rem; border-radius: 20px;
+  }
+
+  .step { display: none; }
+  .step.active { display: block; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media (max-width: 520px) {
+    .input-section { padding: 1.6rem 1.2rem; }
+    h1 { font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <span class="sarina-top">Deine Zeit gehört dir</span>
+    <h1>Wo versteckt sich deine<br><em>verlorene Stunde?</em></h1>
+    <p class="subtitle">Erzähl mir von deinem Alltag –<br>ich zeige dir, wo Raum für dich ist.</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="step-indicator" id="stepDots">
+    <div class="step-dot active" id="dot0"></div>
+    <div class="step-dot" id="dot1"></div>
+    <div class="step-dot" id="dot2"></div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar" style="width:33%"></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step active" id="step1">
+    <div class="input-section">
+      <div class="section-label">Dein typischer Tag</div>
+      <div class="section-hint">Beschreibe deinen Alltag so konkret wie möglich – von morgens bis abends.<br>Je mehr Details, desto treffsicherer das Ergebnis.</div>
+      <textarea id="tagesablauf" maxlength="1500"
+        placeholder="Zum Beispiel: Ich stehe um 6:30 auf, mache kurz Kaffee, bringe dann die Kinder um 7:45 in die Schule. Danach arbeite ich von zu Hause – meistens am Laptop, zwischen E-Mails, Calls und Haushalts-Dingen. Mittags mache ich meistens keinen richtigen Stopp. Nachmittags hole ich die Kinder, dann Hausaufgaben, Kochen, Aufräumen. Abends bin ich meistens zu erschöpft für mich selbst..."
+        rows="7"></textarea>
+      <div class="char-count" id="charCount">0 / 1500</div>
+      <button class="btn-primary" onclick="goToStep2()">Weiter →</button>
+    </div>
+    <div class="error-box" id="err1"></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step" id="step2">
+    <div class="input-section">
+      <div class="section-label">Noch ein paar Fragen</div>
+      <div class="section-hint">Damit ich wirklich verstehe, wo deine Zeit hinfließt.</div>
+
+      <div class="question-card">
+        <label>Was tust du, wenn du eigentlich „Pause" machst?</label>
+        <div class="q-hint">Social Media scrollen, Wäsche falten, nochmal E-Mails checken – ganz ehrlich.</div>
+        <textarea id="q1" placeholder="Meine ehrliche Antwort..." rows="3" maxlength="500"></textarea>
+      </div>
+      <div class="question-card">
+        <label>Welche Aufgabe kostet dich täglich unverhältnismäßig viel Zeit oder Energie?</label>
+        <div class="q-hint">Etwas, bei dem du denkst: „Das müsste eigentlich schneller gehen."</div>
+        <textarea id="q2" placeholder="Ich brauche ewig für..." rows="3" maxlength="500"></textarea>
+      </div>
+      <div class="question-card">
+        <label>Was machst du, das eigentlich jemand anderes tun könnte?</label>
+        <div class="q-hint">Aufgaben, die du übernimmst, obwohl sie nicht wirklich deine sind.</div>
+        <textarea id="q3" placeholder="Eigentlich könnte auch..." rows="3" maxlength="500"></textarea>
+      </div>
+      <div class="question-card">
+        <label>Wann fühlst du dich am lebendigsten – und wann am leersten?</label>
+        <div class="q-hint">Tageszeit, Situation, Umfeld – was auch immer dir einfällt.</div>
+        <textarea id="q4" placeholder="Lebendig fühle ich mich, wenn... Leer danach, wenn..." rows="3" maxlength="500"></textarea>
+      </div>
+
+      <button class="btn-primary" id="analyseBtn" onclick="analyse()">Meine verlorene Stunde finden ✦</button>
+    </div>
+    <div class="error-box" id="err2"></div>
+  </div>
+
+  <!-- LOADING -->
+  <div class="loading-state" id="loadingState">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Dein Alltag wird analysiert...</div>
+    <div class="loading-sub" id="loadingSub">Das dauert nur einen Moment.</div>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-section" id="results">
+    <button class="btn-back" onclick="resetAll()">← Zurück</button>
+    <div class="results-header">
+      <h2>Deine <em style="font-style:italic;color:var(--highlight)">verlorene</em> Stunde</h2>
+      <p>Hier ist, was dein Alltag mir verraten hat.</p>
+    </div>
+    <div id="summaryBox"></div>
+    <div id="cardsContainer"></div>
+  </div>
+
+</div>
+
+<script>
+  // Char counter
+  document.getElementById('tagesablauf').addEventListener('input', function () {
+    document.getElementById('charCount').textContent = this.value.length + ' / 1500';
+  });
+
+  function updateDots(step) {
+    for (let i = 0; i < 3; i++) {
+      const d = document.getElementById('dot' + i);
+      d.className = 'step-dot' + (i < step - 1 ? ' done' : i === step - 1 ? ' active' : '');
+    }
+    document.getElementById('progressBar').style.width = [33, 66, 100][step - 1] + '%';
+  }
+
+  function showErr(id, msg) {
+    const b = document.getElementById(id);
+    b.textContent = msg; b.classList.add('visible');
+  }
+  function hideErr(id) { document.getElementById(id).classList.remove('visible'); }
+
+  function goToStep2() {
+    if (document.getElementById('tagesablauf').value.trim().length < 30) {
+      showErr('err1', 'Bitte beschreibe deinen Alltag etwas ausführlicher – mindestens ein paar Sätze.');
+      return;
+    }
+    hideErr('err1');
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+    updateDots(2);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function resetAll() {
+    ['step1','step2'].forEach(id => {
+      document.getElementById(id).classList.remove('active');
+    });
+    document.getElementById('step1').classList.add('active');
+    document.getElementById('results').classList.remove('visible');
+    document.getElementById('loadingState').classList.remove('visible');
+    document.getElementById('stepDots').style.display = 'flex';
+    document.querySelector('.progress-wrap').style.display = 'block';
+    hideErr('err1'); hideErr('err2');
+    updateDots(1);
+    ['tagesablauf','q1','q2','q3','q4'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('charCount').textContent = '0 / 1500';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  async function callWithRetry(body, attempt = 1) {
+    const lt = document.getElementById('loadingText');
+    const ls = document.getElementById('loadingSub');
+    if (attempt > 1) {
+      lt.textContent = `Versuch ${attempt}/3 – gleich...`;
+      ls.textContent = 'Die KI ist gerade sehr beschäftigt, ich probiere es nochmal.';
+    }
+
+    const res = await fetch('/.netlify/functions/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+
+    if ((res.status === 529 || res.status === 503) && attempt < 3) {
+      await new Promise(r => setTimeout(r, 2500));
+      return callWithRetry(body, attempt + 1);
+    }
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error || `Fehler ${res.status}`);
+    }
+    return res.json();
+  }
+
+  async function analyse() {
+    const tagesablauf = document.getElementById('tagesablauf').value.trim();
+    const q1 = document.getElementById('q1').value.trim();
+    const q2 = document.getElementById('q2').value.trim();
+    const q3 = document.getElementById('q3').value.trim();
+    const q4 = document.getElementById('q4').value.trim();
+
+    if (!q1 && !q2 && !q3 && !q4) {
+      showErr('err2', 'Beantworte bitte mindestens eine der Fragen, damit ich dir eine gute Analyse geben kann.');
+      return;
+    }
+    hideErr('err2');
+
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('stepDots').style.display = 'none';
+    document.querySelector('.progress-wrap').style.display = 'none';
+    document.getElementById('loadingState').classList.add('visible');
+    document.getElementById('loadingText').textContent = 'Dein Alltag wird analysiert...';
+    document.getElementById('loadingSub').textContent = 'Das dauert nur einen Moment.';
+
+    const userContent = [
+      `Tagesablauf: ${tagesablauf}`,
+      `Was ich in Pausen tue: ${q1 || '(keine Angabe)'}`,
+      `Was unverhältnismäßig viel Zeit kostet: ${q2 || '(keine Angabe)'}`,
+      `Was andere übernehmen könnten: ${q3 || '(keine Angabe)'}`,
+      `Wann ich lebendig / leer bin: ${q4 || '(keine Angabe)'}`
+    ].join('\n\n');
+
+    const systemPrompt = `Du bist eine einfühlsame, direkte Beraterin für Frauen in der Lebensmitte. Du analysierst Tagesabläufe und findest versteckte Zeitpotenziale.
+
+Analysiere den Alltag der Frau und gib deine Antwort NUR als valides JSON-Array zurück. Kein Markdown, keine Backticks, kein Text davor oder danach. Nur das rohe JSON-Array.
+
+Das Array enthält 5–7 Objekte. Jedes Objekt hat:
+- "typ": einer von "frei", "sparen", "delegieren", "einsicht"
+- "titel": kurzer Titel (max 8 Wörter)
+- "text": konkrete, warme Erklärung (3–5 Sätze, bezogen auf ihren Alltag, keine Floskeln)
+- "minuten": geschätzte Minuten täglich die gewonnen werden können (Zahl, 0 wenn nicht anwendbar)
+- "badge": kurzes Label (max 3 Wörter)
+
+Typ-Bedeutungen:
+- "frei": bereits vorhandene freie Zeit, die sie nicht als solche erkennt
+- "sparen": wo sie Zeit einsparen kann durch kleine Änderungen
+- "delegieren": Aufgaben, die andere übernehmen könnten
+- "einsicht": tiefere Erkenntnis über ihr Verhältnis zur eigenen Zeit
+
+Füge ZUERST ein Objekt mit typ "summary" ein:
+- "typ": "summary"
+- "titel": motivierende Zusammenfassung (1 Satz)
+- "text": prägnante Einleitung (2 Sätze)
+- "minuten": Gesamtpotenzial (Summe aller anderen)
+- "badge": "Dein Potenzial"
+
+Antworte NUR mit dem JSON-Array, ohne jeglichen anderen Text.`;
+
+    try {
+      const data = await callWithRetry({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 3000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userContent }]
+      });
+
+      const rawText = data.content.map(b => b.text || '').join('');
+      const match = rawText.match(/\[[\s\S]*\]/);
+      if (!match) throw new Error('Die Antwort konnte nicht verarbeitet werden. Bitte versuche es nochmal.');
+
+      let cards;
+      try { cards = JSON.parse(match[0]); }
+      catch { throw new Error('Unerwartetes Antwortformat. Bitte versuche es erneut.'); }
+
+      renderResults(cards);
+    } catch (err) {
+      document.getElementById('loadingState').classList.remove('visible');
+      document.getElementById('step2').classList.add('active');
+      document.getElementById('stepDots').style.display = 'flex';
+      document.querySelector('.progress-wrap').style.display = 'block';
+      showErr('err2', '⚠ ' + (err.message || 'Ein unbekannter Fehler ist aufgetreten. Bitte versuche es nochmal.'));
+    }
+  }
+
+  function renderResults(cards) {
+    document.getElementById('loadingState').classList.remove('visible');
+
+    const summary = cards.find(c => c.typ === 'summary');
+    const main = cards.filter(c => c.typ !== 'summary');
+
+    // Summary
+    if (summary) {
+      const h = Math.round(summary.minuten / 60 * 10) / 10;
+      document.getElementById('summaryBox').innerHTML = `
+        <div class="summary-box">
+          <span class="sarina-inner">✦ deine analyse ✦</span>
+          <span class="summary-number">${summary.minuten}<span style="font-size:1.25rem"> Min</span></span>
+          <div class="summary-label">Zeitpotenzial täglich – das sind über <strong>${h} Stunden</strong> pro Tag</div>
+          <p class="summary-text">${summary.text}</p>
+        </div>`;
+    }
+
+    // Cards
+    const container = document.getElementById('cardsContainer');
+    container.innerHTML = '';
+    const typeMap = {
+      frei:       { cls: 'card-free',     icon: '◎' },
+      sparen:     { cls: 'card-save',     icon: '⧖' },
+      delegieren: { cls: 'card-delegate', icon: '⇄' },
+      einsicht:   { cls: 'card-insight',  icon: '✦' }
+    };
+
+    main.forEach((card, i) => {
+      const t = typeMap[card.typ] || typeMap.einsicht;
+      const div = document.createElement('div');
+      div.className = `result-card ${t.cls}`;
+      div.style.animationDelay = (0.15 + i * 0.12) + 's';
+      div.innerHTML = `
+        <span class="card-type-badge">${card.badge || card.typ}</span>
+        <div class="card-title">${card.titel}</div>
+        <div class="card-body">${card.text}</div>
+        ${card.minuten > 0 ? `<span class="card-time">${t.icon} ${card.minuten} Minuten täglich</span>` : ''}`;
+      container.appendChild(div);
+    });
+
+    document.getElementById('results').classList.add('visible');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
