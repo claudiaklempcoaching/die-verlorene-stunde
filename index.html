@@ -219,8 +219,32 @@
   .step { display: none; }
   .step.active { display: block; }
 
+  .results-actions {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 1.8rem; gap: 1rem;
+  }
+  .btn-pdf {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.6rem 1.3rem;
+    background: linear-gradient(135deg, var(--accent), #b85580);
+    color: #fff; border: none; border-radius: 9px;
+    font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    transition: all 0.2s; box-shadow: 0 3px 12px rgba(202,110,148,0.3);
+  }
+  .btn-pdf:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(202,110,148,0.4); }
+
   @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    body::before, body::after { display: none; }
+    .results-actions { display: none; }
+    .result-card { break-inside: avoid; opacity: 1 !important; transform: none !important; animation: none !important; }
+    .summary-box { opacity: 1 !important; animation: none !important; }
+    .results-section { display: block !important; }
+    .header, .step-indicator, .progress-wrap, .step, .loading-state { display: none !important; }
+  }
 
   @media (max-width: 520px) {
     .input-section { padding: 1.6rem 1.2rem; }
@@ -302,7 +326,10 @@
 
   <!-- RESULTS -->
   <div class="results-section" id="results">
-    <button class="btn-back" onclick="resetAll()">← Zurück</button>
+    <div class="results-actions">
+      <button class="btn-back" onclick="resetAll()">← Zurück</button>
+      <button class="btn-pdf" onclick="downloadPDF()">↓ Als PDF speichern</button>
+    </div>
     <div class="results-header">
       <h2>Deine <em style="font-style:italic;color:var(--highlight)">verlorene</em> Stunde</h2>
       <p>Hier ist, was dein Alltag mir verraten hat.</p>
@@ -512,6 +539,9 @@ Antworte NUR mit dem JSON-Array, ohne jeglichen anderen Text.`;
 
     document.getElementById('results').classList.add('visible');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function downloadPDF() {
+    window.print();
   }
 </script>
 </body>
